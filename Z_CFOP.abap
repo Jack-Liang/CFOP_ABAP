@@ -8,7 +8,7 @@
 *  程序名称：Z_CFOP
 *-------------------------------------------------
 *  创建日期         程序员        程序类型
-*  2021。07.29      JACK LIANG     REPORT
+*  2021.07.29      JACK LIANG     REPORT
 *-------------------------------------------------
 *  描述：
 *    通过CFOP方法还原魔方
@@ -23,10 +23,10 @@
 ************************************************************************
 REPORT Z_CFOP.
 
-include Z_CFOP_TOP.
-include Z_CFOP_CHECK.
-include Z_CFOP_SEARCH.
-include Z_CFOP_OPERATE.
+INCLUDE Z_CFOP_TOP.
+INCLUDE Z_CFOP_CHECK.
+INCLUDE Z_CFOP_SEARCH.
+INCLUDE Z_CFOP_OPERATE.
 PARAMETERS: P_CUBE TYPE C LENGTH 54.
 
 INITIALIZATION.
@@ -50,3 +50,6 @@ START-OF-SELECTION.
   PERFORM FRM_TRANSFORM USING 'A'.
   PERFORM FRM_TRANSFORM USING 'B'.
 
+END-OF-SELECTION.
+
+  WRITE: / '完成'.
