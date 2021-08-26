@@ -35,6 +35,8 @@ FORM FRM_SCRAMBLE .
   PERFORM FRM_APPLY_ALG USING SCRAMBLE CHANGING LT_CUBE_DICT.
 
 
+
+
 ENDFORM.
 *&---------------------------------------------------------------------*
 *& Form FRM_STRING_TO_TT_CUBE
@@ -124,9 +126,9 @@ FORM FRM_SIX_PERM_TO_DICT  CHANGING PS_CONVERTED_PERM TYPE TY_PERM
   DATA: X TYPE I,
         Y TYPE I,
         Z TYPE I.
-  DATA: I TYPE I,
-        J TYPE I,
-        K TYPE I.
+  DATA: I TYPE C,
+        J TYPE C,
+        K TYPE C.
   DATA: LS_CUBE_DICT TYPE TY_CUBE_DICT.
 
   FIELD-SYMBOLS:<FS_FACE>,
@@ -208,8 +210,76 @@ ENDFORM.
 *&      --> SCRAMBLE
 *&      <-- LT_CUBE_DICT
 *&---------------------------------------------------------------------*
-FORM FRM_APPLY_ALG  USING    PV_SCRAMBLE TYPE CHAR20
+FORM FRM_APPLY_ALG  USING    PV_ALG TYPE CHAR20
                     CHANGING PT_CUBE_DICT TYPE TT_CUBE_DICT.
+  DATA: LT_ALG TYPE TABLE OF C WITH HEADER LINE.
+  DATA CHARLEN TYPE I VALUE 0.
 
+  WHILE CHARLEN LT STRLEN( PV_ALG ).
+    MOVE PV_ALG+CHARLEN(1) TO LT_ALG.
+    APPEND LT_ALG.
+    ADD 1 TO CHARLEN .
+  ENDWHILE.
+
+  LOOP AT LT_ALG.
+    PERFORM FRM_TURN_ROTATE USING LT_ALG CHANGING PT_CUBE_DICT.
+
+
+  ENDLOOP.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form FRM_TURN_ROTATE
+*&---------------------------------------------------------------------*
+*& 转动
+*&---------------------------------------------------------------------*
+*&      --> LT_ALG
+*&      <-- PT_CUBE_DICT
+*&---------------------------------------------------------------------*
+FORM FRM_TURN_ROTATE  USING    PV_TURN TYPE C
+                      CHANGING PT_CUBE_DICT TYPE TT_CUBE_DICT.
+  DATA: LV_SIN TYPE I .
+  DATA: LT_CUBE_DICT TYPE TABLE OF TY_CUBE_DICT WITH HEADER LINE.
+
+  READ TABLE TURN_DICT ASSIGNING FIELD-SYMBOL(<FS_TURN_DICT>) WITH KEY CODE = PV_TURN.
+  IF SY-SUBRC = '0'.
+*  ( CODE = 'R' TTYPE = 'cw'  SIDE =  'r' BOOL = ABAP_FALSE )
+    CASE <FS_TURN_DICT>-TTYPE.
+      WHEN 'cw'.
+*        LV_DO = 1.
+        LV_SIN = 1.
+      WHEN 'ccw'.
+        LV_SIN = -1.
+      WHEN 'dt'.
+
+    ENDCASE.
+
+    CASE <FS_TURN_DICT>-SIDE.
+      WHEN 'l' OR 'r'.
+        DATA(LV_A) = 'X'.
+      WHEN 'u' OR 'd'.
+        LV_A = 'Y'.
+      WHEN 'f' OR 'b'.
+        LV_A = 'Z'.
+
+
+      WHEN 'm'.
+      WHEN 'x'.
+      WHEN 'y'.
+      WHEN 'z'.
+      WHEN OTHERS.
+    ENDCASE.
+
+    LOOP AT PT_CUBE_DICT INTO LT_CUBE_DICT .
+      ASSIGN COMPONENT LV_A OF STRUCTURE LT_CUBE_DICT TO FIELD-SYMBOL(<FV_A>).
+      IF <FV_A> EQ 0 .
+        LT_CUBE_DICT-X = LV_SIN * LT_CUBE_DICT-Y.
+        LT_CUBE_DICT-Y = - ( LV_SIN * LT_CUBE_DICT-X ) .
+      ENDIF.
+
+      APPEND LT_CUBE_DICT.
+    ENDLOOP.
+  ENDIF.
 
 ENDFORM.
