@@ -29,6 +29,12 @@ INCLUDE z_cfop_operate.
 INITIALIZATION.
   PERFORM frm_initialization.
 
+  LOOP AT SCREEN .
+    IF screen-name = 'P_SCRAM'.
+      screen-active = 0.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
 
 AT SELECTION-SCREEN .
   IF sy-ucomm = 'SCRAMBLE'.
@@ -36,6 +42,15 @@ AT SELECTION-SCREEN .
 
     PERFORM frm_scramble.
 
+    LOOP AT SCREEN .
+      IF screen-name = 'P_SCRAM'.
+        screen-active = 0.
+        screen-input  = 0. "no input
+        screen-output  = 1.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+    p_scram = `R B R' L`.
   ENDIF.
 
 
