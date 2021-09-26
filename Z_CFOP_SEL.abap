@@ -46,6 +46,7 @@ SELECTION-SCREEN: END OF BLOCK b2.
 
 SELECTION-SCREEN: BEGIN OF LINE,
   PUSHBUTTON 5(23) scramble USER-COMMAND scramble.
+PARAMETERS p_scram TYPE c LENGTH 60.
 SELECTION-SCREEN: END OF LINE.
 *&---------------------------------------------------------------------*
 *& Form FRM_INITIALIZATION
