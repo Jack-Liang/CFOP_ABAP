@@ -71,6 +71,7 @@ code编码便于在执行旋转过程中的处理
 1. https://github.com/crumpstrr33/CFOP-cube-solver
 2. https://www.speedsolving.com/wiki/index.php/CFOP_method
 3. https://juejin.cn/post/6970700421035884558
+4. http://kociemba.org/cube.htm
 
 谨对以上文献的作者表示感谢，未竟之处，敬请谅解，欢迎交流指正。
 
