@@ -28,7 +28,9 @@ INITIALIZATION.
 
 AT SELECTION-SCREEN.
   IF sy-ucomm = 'SCRAM'.
-    p_scram = lcl_cube=>random_scramble( 25 ).
+    " 步数异常时回落默认 10；1~60 步公式最长 179 字符，p_scram(200) 足够
+    DATA(lv_len) = COND i( WHEN p_slen >= 1 AND p_slen <= 60 THEN p_slen ELSE 10 ).
+    p_scram = lcl_cube=>random_scramble( lv_len ).
   ELSEIF sy-ucomm = 'FILL'.
     p_yellow = 'YYYYYYYYY'.
     p_orange = 'OOOOOOOOO'.
@@ -83,28 +85,44 @@ START-OF-SELECTION.
     RETURN.
   ENDIF.
 
-  " 按阶段输出公式
-  DATA lv_total TYPE i VALUE 0.
-  DATA lv_stage TYPE string.
+  " 转法记号说明
+  ULINE.
+  WRITE: / '转法记号：U/D/L/R/F/B = 上/下/左/右/前/后面，从该面外侧看顺时针；X''= 逆时针；X2 = 180°。'.
+
+  " 按阶段输出：阶段标题 + 化简后公式（每行 12 步，便于跟做）
+  DATA: lv_total  TYPE i VALUE 0,
+        lv_total2 TYPE i VALUE 0,
+        lv_stage  TYPE string,
+        lv_cnt    TYPE i,
+        lv_alg    TYPE string,
+        lv_full   TYPE string.
   LOOP AT lt_steps INTO DATA(ls_step).
     IF ls_step-stage <> lv_stage.
+      IF lv_stage IS NOT INITIAL.
+        PERFORM frm_show_stage USING lv_stage lv_alg CHANGING lv_full lv_total2.
+      ENDIF.
       lv_stage = ls_step-stage.
-      WRITE: / |阶段 { lv_stage }| COLOR COL_HEADING.
+      CLEAR: lv_alg, lv_cnt.
     ENDIF.
-    lv_total = lv_total + 1.
-  ENDLOOP.
-  ULINE.
-  WRITE: / |共 { lv_total } 步，完整公式:|.
-  DATA lv_alg TYPE string.
-  LOOP AT lt_steps INTO ls_step.
+    lv_cnt = lv_cnt + 1.
     lv_alg = COND #( WHEN lv_alg IS INITIAL THEN ls_step-move
                      ELSE |{ lv_alg } { ls_step-move }| ).
+    lv_total = lv_total + 1.
   ENDLOOP.
-  WRITE: / lv_alg.
+  IF lv_stage IS NOT INITIAL.
+    PERFORM frm_show_stage USING lv_stage lv_alg CHANGING lv_full lv_total2.
+  ENDIF.
 
-  " 重放公式，确认复原
-  LOOP AT lt_steps INTO ls_step.
-    lt_cubies = lcl_cube=>apply_move( it_cubies = lt_cubies iv_move = ls_step-move ).
+  ULINE.
+  WRITE: / |合计：求解器 { lv_total } 步，化简后 { lv_total2 } 步（每行 12 步，逐行执行）|.
+
+  " 重放化简后的完整公式，确认复原（同时验证化简未改变语义）
+  SPLIT lv_full AT space INTO TABLE DATA(lt_run).
+  LOOP AT lt_run INTO DATA(lv_run).
+    IF lv_run IS INITIAL.
+      CONTINUE.
+    ENDIF.
+    lt_cubies = lcl_cube=>apply_move( it_cubies = lt_cubies iv_move = lv_run ).
   ENDLOOP.
   IF lcl_cube=>is_solved( lt_cubies ) = abap_false.
     WRITE: / '警告: 重放公式后未复原（内部错误）' COLOR COL_NEGATIVE.
@@ -113,6 +131,37 @@ START-OF-SELECTION.
   ULINE.
   WRITE: / '执行后的魔方（应为复原态）:'.
   PERFORM frm_show_cube USING lt_cubies.
+
+*&---------------------------------------------------------------------*
+*& Form FRM_SHOW_STAGE：输出一个阶段的化简公式（每行 12 步）
+*&---------------------------------------------------------------------*
+FORM frm_show_stage USING pv_stage TYPE string
+                          pv_alg   TYPE string
+                    CHANGING cv_full  TYPE string
+                             cv_total TYPE i.
+  WRITE: / |阶段 { pv_stage }| COLOR COL_HEADING.
+  DATA(lv_simple) = lcl_cube=>simplify_alg( pv_alg ).
+  SPLIT lv_simple AT space INTO TABLE DATA(lt_mv).
+  WRITE: / |  化简后 { lines( lt_mv ) } 步:|.
+  DATA: lv_line TYPE string,
+        lv_n    TYPE i.
+  LOOP AT lt_mv INTO DATA(lv_m).
+    IF lv_m IS INITIAL.
+      CONTINUE.
+    ENDIF.
+    lv_n = lv_n + 1.
+    lv_line = COND #( WHEN lv_line IS INITIAL THEN lv_m ELSE |{ lv_line } { lv_m }| ).
+    IF lv_n MOD 12 = 0.
+      WRITE: /6 lv_line.
+      CLEAR lv_line.
+    ENDIF.
+  ENDLOOP.
+  IF lv_line IS NOT INITIAL.
+    WRITE: /6 lv_line.
+  ENDIF.
+  cv_total = cv_total + lines( lt_mv ).
+  cv_full = COND #( WHEN cv_full IS INITIAL THEN lv_simple ELSE |{ cv_full } { lv_simple }| ).
+ENDFORM.
 
 *&---------------------------------------------------------------------*
 *& Form FRM_SELF_TEST：自检（引擎 / 录入 / 校验 / 求解 回归）

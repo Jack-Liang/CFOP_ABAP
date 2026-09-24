@@ -676,9 +676,9 @@ CLASS lcl_solver IMPLEMENTATION.
 
   METHOD face_of_side.
     rv_face = SWITCH #( iv_side WHEN 'G' THEN 'F'
-                                    WHEN 'R' THEN 'R'
+                                    WHEN 'R' THEN 'L'
                                     WHEN 'B' THEN 'B'
-                                    WHEN 'O' THEN 'L'
+                                    WHEN 'O' THEN 'R'
                                     ELSE iv_side ).
   ENDMETHOD.
 

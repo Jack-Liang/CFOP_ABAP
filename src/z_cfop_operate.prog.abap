@@ -18,9 +18,9 @@ CLASS lcl_cube IMPLEMENTATION.
             CLEAR ls.
             ls-idx = idx_of( iv_x = lv_x iv_y = lv_y iv_z = lv_z ).
             IF lv_x = 1.
-              ls-cx = 'R'.
-            ELSEIF lv_x = -1.
               ls-cx = 'O'.
+            ELSEIF lv_x = -1.
+              ls-cx = 'R'.
             ENDIF.
             IF lv_y = 1.
               ls-cy = 'Y'.
@@ -99,8 +99,8 @@ CLASS lcl_cube IMPLEMENTATION.
                           WHEN 'W' THEN 'D'
                           WHEN 'G' THEN 'F'
                           WHEN 'B' THEN 'B'
-                          WHEN 'R' THEN 'R'
-                          WHEN 'O' THEN 'L'
+                          WHEN 'R' THEN 'L'
+                          WHEN 'O' THEN 'R'
                           ELSE space ).
       IF lv_face IS INITIAL.
         CONTINUE.
@@ -283,6 +283,44 @@ CLASS lcl_cube IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD simplify_alg.
+    " 栈式化简：与栈顶同面的转动按净四分之一圈数（mod 4）合并，0 则双双消除；
+    " 消除后栈顶变化，可继续与前一步合并（如 U U' R R' 全消）。
+    TYPES: BEGIN OF ty_m,
+             face TYPE c LENGTH 1,
+             turn TYPE i,            " 1=X 2=X2 3=X'
+           END OF ty_m.
+    DATA: lt_stack TYPE STANDARD TABLE OF ty_m,
+          lt_move  TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+    SPLIT iv_alg AT space INTO TABLE lt_move.
+    LOOP AT lt_move INTO DATA(lv_move).
+      IF lv_move IS INITIAL.
+        CONTINUE.
+      ENDIF.
+      DATA(lv_face) = substring( val = lv_move off = 0 len = 1 ).
+      DATA(lv_turn) = COND i( WHEN lv_move CA '2' THEN 2
+                              WHEN lv_move CA `'` THEN 3
+                              ELSE 1 ).
+      IF lines( lt_stack ) > 0.
+        READ TABLE lt_stack INTO DATA(ls_top) INDEX lines( lt_stack ).
+        IF ls_top-face = lv_face.
+          lv_turn = ( ls_top-turn + lv_turn ) MOD 4.
+          DELETE lt_stack INDEX lines( lt_stack ).
+          IF lv_turn = 0.
+            CONTINUE.
+          ENDIF.
+        ENDIF.
+      ENDIF.
+      APPEND VALUE #( face = lv_face turn = lv_turn ) TO lt_stack.
+    ENDLOOP.
+    LOOP AT lt_stack INTO DATA(ls_m).
+      DATA(lv_txt) = COND #( WHEN ls_m-turn = 1 THEN |{ ls_m-face }|
+                             WHEN ls_m-turn = 2 THEN |{ ls_m-face }2|
+                             ELSE |{ ls_m-face }'| ).
+      rv_alg = COND #( WHEN rv_alg IS INITIAL THEN lv_txt ELSE |{ rv_alg } { lv_txt }| ).
+    ENDLOOP.
+  ENDMETHOD.
+
   " ------------------------------------------------------------- 状态编码
   METHOD to_state.
     rv_state = repeat( val = '.' occ = 81 ).
@@ -327,8 +365,8 @@ CLASS lcl_cube IMPLEMENTATION.
                                     WHEN 'W' THEN 'D'
                                     WHEN 'G' THEN 'F'
                                     WHEN 'B' THEN 'B'
-                                    WHEN 'R' THEN 'R'
-                                    WHEN 'O' THEN 'L' ).
+                                    WHEN 'R' THEN 'L'
+                                    WHEN 'O' THEN 'R' ).
       CLEAR: ls_row, lv_line.
       ls_row-color = lv_color.
       DO 9 TIMES.
@@ -408,11 +446,11 @@ CLASS lcl_cube IMPLEMENTATION.
     DATA(lv_y) = y_of( iv_idx ).
     DATA(lv_z) = z_of( iv_idx ).
     rv_ok = abap_true.
-    IF lv_x = 1 AND ls_cubie-cx <> 'R'.
+    IF lv_x = 1 AND ls_cubie-cx <> 'O'.
       rv_ok = abap_false.
       RETURN.
     ENDIF.
-    IF lv_x = -1 AND ls_cubie-cx <> 'O'.
+    IF lv_x = -1 AND ls_cubie-cx <> 'R'.
       rv_ok = abap_false.
       RETURN.
     ENDIF.

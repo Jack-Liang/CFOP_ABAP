@@ -5,7 +5,7 @@
 * 每面 9 个贴纸：从该面外侧看，按示意图 1-9 行优先顺序
 * （先第一行从左到右 3 个，再第二行，最后第三行）。
 * 面的朝向由中心色决定，系统按标准配色放入固定坐标系
-* （白底、黄顶、绿前、蓝后、红右、橙左）。
+* （白底、黄顶、绿前、蓝后、红左、橙右——与标准配色实物一致）。
 
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE tblock1.
 
@@ -117,15 +117,20 @@ SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN END OF BLOCK b2.
 SELECTION-SCREEN BEGIN OF BLOCK b3 WITH FRAME TITLE tblock3.
 
-" —— 打乱演示：按钮 + 说明一行，公式单独一行加长显示 ——
+" —— 打乱演示：按钮 + 说明一行，步数与公式各自一行 ——
 SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN PUSHBUTTON 5(20) bscram USER-COMMAND scram.
 SELECTION-SCREEN COMMENT 28(60) t_note.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(14) t_slen FOR FIELD p_slen.
+PARAMETERS p_slen TYPE i DEFAULT 10.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 5(14) t_scr FOR FIELD p_scram.
-PARAMETERS p_scram TYPE c LENGTH 100 VISIBLE LENGTH 100.
+PARAMETERS p_scram TYPE c LENGTH 200 VISIBLE LENGTH 200.
 SELECTION-SCREEN END OF LINE.
 
 SELECTION-SCREEN END OF BLOCK b3.
@@ -142,7 +147,7 @@ FORM frm_initialization.
   t_pic04 = '| 7 8 9 |'.
   t_pic05 = '+-------+-------+-------+-------+'.
   t_pic06 = '| 1 2 3 | 1 2 3 | 1 2 3 | 1 2 3 |'.
-  t_pic07 = '| 4 5 6 | 4 5 6 | 4 5 6 | 4 5 6 |    2)橙 3)蓝 4)红 5)绿'.
+  t_pic07 = '| 4 5 6 | 4 5 6 | 4 5 6 | 4 5 6 |    4)红 3)蓝 2)橙 5)绿'.
   t_pic08 = '| 7 8 9 | 7 8 9 | 7 8 9 | 7 8 9 |'.
   t_pic09 = '+-------+-------+-------+-------+'.
   t_pic10 = '+-------+'.
@@ -168,5 +173,6 @@ FORM frm_initialization.
   tblock3 = '打乱演示'.
   bscram = '生成随机打乱公式'.
   t_note = '生成后回车：从复原态打乱后直接求解'.
+  t_slen = '打乱步数:'.
   t_scr = '打乱公式:'.
 ENDFORM.

@@ -7,7 +7,7 @@
  *       ABAP 端 (src/*.abap) 逐逻辑对照移植本文件。
  *
  * 固定坐标系（与 ABAP 端一致）：
- *   x 轴：+1 = R(红)  -1 = L(橙)
+ *   x 轴：+1 = R(橙)  -1 = L(红)
  *   y 轴：+1 = U(黄)  -1 = D(白)
  *   z 轴：+1 = F(绿)  -1 = B(蓝)
  *   魔方状态 = 27 槽位数组（下标 pidx = (x+1)*9+(y+1)*3+(z+1)，核心块槽位 13 恒为 null）
@@ -20,8 +20,8 @@
 // ---------------------------------------------------------------------------
 // 基础常量
 // ---------------------------------------------------------------------------
-const FACE_OF_COLOR = { Y: 'U', W: 'D', G: 'F', B: 'B', R: 'R', O: 'L' };
-const COLOR_OF_FACE = { U: 'Y', D: 'W', F: 'G', B: 'B', R: 'R', L: 'O' };
+const FACE_OF_COLOR = { Y: 'U', W: 'D', G: 'F', B: 'B', R: 'L', O: 'R' };
+const COLOR_OF_FACE = { U: 'Y', D: 'W', F: 'G', B: 'B', R: 'O', L: 'R' };
 const COLOR_SET = new Set(Object.keys(FACE_OF_COLOR));
 
 // 面网格 (r,c ∈ 0..2，从该面外侧看，行自上而下、列自左到右) → 小块坐标 + 贴纸轴向
@@ -58,7 +58,7 @@ function solvedState() {
     const { x, y, z } = coordOf(i);
     if (x === 0 && y === 0 && z === 0) continue;
     const c = { cx: null, cy: null, cz: null };
-    if (x === 1) c.cx = 'R'; if (x === -1) c.cx = 'O';
+    if (x === 1) c.cx = 'O'; if (x === -1) c.cx = 'R';
     if (y === 1) c.cy = 'Y'; if (y === -1) c.cy = 'W';
     if (z === 1) c.cz = 'G'; if (z === -1) c.cz = 'B';
     st[i] = c;
@@ -237,7 +237,7 @@ function findCubie(state, colorsStr) {
 function cubieSolvedAt(state, i) {
   const { x, y, z } = coordOf(i);
   const c = state[i];
-  if (x === 1 && c.cx !== 'R') return false; if (x === -1 && c.cx !== 'O') return false;
+  if (x === 1 && c.cx !== 'O') return false; if (x === -1 && c.cx !== 'R') return false;
   if (y === 1 && c.cy !== 'Y') return false; if (y === -1 && c.cy !== 'W') return false;
   if (z === 1 && c.cz !== 'G') return false; if (z === -1 && c.cz !== 'B') return false;
   if (x === 0 && c.cx !== null) return false;
@@ -247,6 +247,25 @@ function cubieSolvedAt(state, i) {
 }
 
 // ---------------------------------------------------------------------------
+// 公式化简：相邻同面转动合并（UU→U2、UU'→抵消、UUU→U'），语义不变
+function simplifyAlg(alg) {
+  const stack = []; // { face, turn: 1|2|3 }
+  for (const mv of alg.split(/\s+/).filter(Boolean)) {
+    const face = mv[0];
+    const turn = mv.includes('2') ? 2 : mv.includes("'") ? 3 : 1;
+    const top = stack[stack.length - 1];
+    if (top && top.face === face) {
+      const net = (top.turn + turn) % 4;
+      stack.pop();
+      if (net === 0) continue;
+      stack.push({ face, turn: net });
+    } else {
+      stack.push({ face, turn });
+    }
+  }
+  return stack.map(({ face, turn }) => face + (turn === 1 ? '' : turn === 2 ? '2' : "'")).join(' ');
+}
+
 // 打乱
 // ---------------------------------------------------------------------------
 function randomScramble(n = 25, rng = Math.random) {
@@ -268,7 +287,7 @@ function randomScramble(n = 25, rng = Math.random) {
 // 每个阶段完成后立即断言阶段成果，任何异常都会带阶段名抛出。
 // ---------------------------------------------------------------------------
 const SIDE_COLORS = ['G', 'R', 'B', 'O']; // F,R,B,L
-const faceOfSide = { G: 'F', R: 'R', B: 'B', O: 'L' };
+const faceOfSide = { G: 'F', R: 'L', B: 'B', O: 'R' };
 const sideOfFace = { F: 'G', R: 'R', B: 'B', L: 'O' };
 // U 顺时针后各面到达的面（F→L→B→R→F）；U_PREV 为 U' 方向
 const U_NEXT = { F: 'L', L: 'B', B: 'R', R: 'F' };
@@ -678,6 +697,26 @@ function runTests() {
       stats.bfsMax = Math.max(stats.bfsMax, solver.stats.bfsMax);
     }
   });
+  t('公式化简：语义不变且能消除冗余', () => {
+    assert(simplifyAlg("U U") === 'U2', 'UU');
+    assert(simplifyAlg("U U'") === '', "UU'");
+    assert(simplifyAlg("U U U") === "U'", 'UUU');
+    assert(simplifyAlg("U U' R R'") === '', '全消');
+    assert(simplifyAlg("R U R'") === "R U R'", '不同面不动');
+    let saved = 0, n = 0;
+    for (let k = 0; k < 200; k++) {
+      const scr = randomScramble(25);
+      const st = applyAlg(solvedState(), scr);
+      const solver = solveCube(st);
+      const simple = simplifyAlg(solver.moves.join(' '));
+      let st2 = st;
+      for (const m of simple.split(/\s+/).filter(Boolean)) st2 = applyMove(st2, m);
+      assert(isSolved(st2), `第 ${k} 次化简公式未复原: ${simple}`);
+      saved += solver.moves.length - simple.split(/\s+/).filter(Boolean).length;
+      n++;
+    }
+    console.log(`    化简平均节省 ${(saved / n).toFixed(1)} 步`);
+  });
   t('浅打乱 / 已复原态也能处理', () => {
     solveCube(solvedState());
     const st = applyAlg(solvedState(), "R U R' U'");
@@ -718,7 +757,7 @@ if (process.argv[2] === 'discover') discover();
 else if (process.argv[1] && process.argv[1].endsWith('cube_ref.mjs')) runTests();
 
 export {
-  solvedState, cloneState, hashState, applyMove, applyAlg, facelets, parseInput,
+  solvedState, cloneState, hashState, applyMove, applyAlg, simplifyAlg, facelets, parseInput,
   checkAll, isSolved, findCubie, cubieSolvedAt, randomScramble, solveCube,
   pidx, coordOf, BASIC_18, MOVE_DEF, Solver,
   stageCross, stageCorners, stageSecondLayer, stageTopCross, stageTopCornerOrient, stageCornerPerm, stageEdgePerm,

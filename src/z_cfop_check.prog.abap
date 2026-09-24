@@ -67,11 +67,11 @@ FORM frm_show_cube USING pt_cubies TYPE tt_cubie.
       WHEN 'Y'.
       WRITE: / '黄色面(U):'.
       WHEN 'O'.
-      WRITE: / '橙色面(L):'.
+      WRITE: / '橙色面(R):'.
       WHEN 'B'.
       WRITE: / '蓝色面(B):'.
       WHEN 'R'.
-      WRITE: / '红色面(R):'.
+      WRITE: / '红色面(L):'.
       WHEN 'G'.
       WRITE: / '绿色面(F):'.
       WHEN 'W'.

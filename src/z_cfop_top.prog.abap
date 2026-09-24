@@ -2,7 +2,7 @@
 *& 包含 Z_CFOP_TOP：数据类型与类声明
 *&---------------------------------------------------------------------*
 * 固定坐标系（与参考实现 ref/cube_ref.mjs 完全一致）：
-*   x 轴：+1 = R(红)  -1 = L(橙)
+*   x 轴：+1 = R(橙)  -1 = L(红)
 *   y 轴：+1 = U(黄)  -1 = D(白)
 *   z 轴：+1 = F(绿)  -1 = B(蓝)
 *   槽位下标 idx = (x+1)*9 + (y+1)*3 + (z+1)，核心块槽位 13 恒不存在。
@@ -80,6 +80,11 @@ CLASS lcl_cube DEFINITION FINAL.
       IMPORTING it_cubies      TYPE tt_cubie
                 iv_alg         TYPE string
       RETURNING VALUE(rt_cubies) TYPE tt_cubie.
+
+    " 化简公式：相邻同面转动合并（UU→U2、UU'→抵消、UUU→U'），语义不变
+    CLASS-METHODS simplify_alg
+      IMPORTING iv_alg         TYPE string
+      RETURNING VALUE(rv_alg)  TYPE string.
 
     " —— 状态编码 / 展示 ——
     CLASS-METHODS to_state
