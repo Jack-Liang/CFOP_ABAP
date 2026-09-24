@@ -1,0 +1,85 @@
+{
+  "global": {
+    "files": "/src/**/*.*",
+    "exclude": [],
+    "noIssues": [
+      {
+        "description": "include 独立分析缺少主程序上下文；主程序 z_cfop 已拼合全部 include 做完整 check_syntax",
+        "file": "src/z_cfop_top.prog.abap",
+        "rule": "check_syntax"
+      },
+      {
+        "description": "同上",
+        "file": "src/z_cfop_sel.prog.abap",
+        "rule": "check_syntax"
+      },
+      {
+        "description": "同上",
+        "file": "src/z_cfop_check.prog.abap",
+        "rule": "check_syntax"
+      },
+      {
+        "description": "同上",
+        "file": "src/z_cfop_operate.prog.abap",
+        "rule": "check_syntax"
+      },
+      {
+        "description": "同上",
+        "file": "src/z_cfop_search.prog.abap",
+        "rule": "check_syntax"
+      }
+    ],
+    "skipGeneratedGatewayClasses": true,
+    "skipGeneratedPersistentClasses": true,
+    "skipGeneratedFunctionGroups": true
+  },
+  "syntax": {
+    "version": "v750",
+    "errorNamespace": "^(Z|Y|LCL_|LCX_|TY_|TT_)",
+    "globalConstants": [],
+    "globalMacros": []
+  },
+  "rules": {
+    "ambiguous_statement": true,
+    "avoid_use": {
+      "define": true,
+      "endselect": true,
+      "execSQL": true,
+      "kernelCall": true,
+      "communication": true,
+      "systemCall": true,
+      "break": true,
+      "defaultKey": false
+    },
+    "begin_end_names": true,
+    "check_syntax": true,
+    "class_attribute_names": true,
+    "commented_code": true,
+    "contains_tab": true,
+    "definitions_top": true,
+    "description_empty": true,
+    "empty_line_in_statement": true,
+    "empty_statement": true,
+    "exit_or_check": true,
+    "exporting": true,
+    "functional_writing": true,
+    "line_length": {
+      "length": 120
+    },
+    "line_only_punc": true,
+    "local_class_naming": {
+      "localClasses": "^LCL_.+$",
+      "localExceptions": "^LCX_.+$"
+    },
+    "max_one_statement": true,
+    "obsolete_statement": true,
+    "parser_error": true,
+    "space_before_dot": true,
+    "start_at_tab": false,
+    "sequential_blank": {
+      "lines": 4
+    },
+    "statement_after_in_statement": true,
+    "whitespace_end": true
+  }
+}

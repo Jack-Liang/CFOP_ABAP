@@ -1,0 +1,13 @@
+{
+  "name": "cfop-abap",
+  "version": "2.0.0",
+  "private": true,
+  "description": "用 ABAP 还原三阶魔方（LBL/CFOP 思路，三维坐标模型）",
+  "scripts": {
+    "lint": "abaplint",
+    "test": "node ref/cube_ref.mjs"
+  },
+  "devDependencies": {
+    "@abaplint/cli": "^2.108.0"
+  }
+}
