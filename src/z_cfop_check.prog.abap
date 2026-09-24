@@ -13,6 +13,15 @@
 *&---------------------------------------------------------------------*
 FORM frm_build_cube CHANGING pt_cubies TYPE tt_cubie
                              rv_ok     TYPE abap_bool.
+  " 六面全空：直接提示，不进入逐项校验
+  IF p_yellow IS INITIAL AND p_orange IS INITIAL AND p_blue IS INITIAL
+     AND p_red IS INITIAL AND p_green IS INITIAL AND p_white IS INITIAL.
+    WRITE: / '未录入六面颜色。请录入后执行，或用选择屏幕按钮' COLOR COL_NEGATIVE,
+         / '"填入复原态示例" / "生成随机打乱公式"。' COLOR COL_NEGATIVE.
+    rv_ok = abap_false.
+    RETURN.
+  ENDIF.
+
   DATA lt_faces TYPE tt_facestr.
   lt_faces = VALUE #( ( color = 'Y' face = p_yellow )
                       ( color = 'O' face = p_orange )

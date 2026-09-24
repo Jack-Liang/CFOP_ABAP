@@ -29,6 +29,13 @@ INITIALIZATION.
 AT SELECTION-SCREEN.
   IF sy-ucomm = 'SCRAM'.
     p_scram = lcl_cube=>random_scramble( 25 ).
+  ELSEIF sy-ucomm = 'FILL'.
+    p_yellow = 'YYYYYYYYY'.
+    p_orange = 'OOOOOOOOO'.
+    p_blue   = 'BBBBBBBBB'.
+    p_red    = 'RRRRRRRRR'.
+    p_green  = 'GGGGGGGGG'.
+    p_white  = 'WWWWWWWWW'.
   ENDIF.
 
 START-OF-SELECTION.

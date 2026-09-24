@@ -87,6 +87,11 @@ CLASS lcl_cube IMPLEMENTATION.
       ENDIF.
     ENDDO.
 
+    " 有录入错误即终止：后续放置阶段要求每面均为合法的 9 贴纸
+    IF et_msg IS NOT INITIAL.
+      RETURN.
+    ENDIF.
+
     " —— 中心色定面：把 54 张贴纸放到三维槽位 ——
     LOOP AT it_faces INTO ls_face.
       lv_face = SWITCH #( substring( val = ls_face-face off = 4 len = 1 )
@@ -162,9 +167,6 @@ CLASS lcl_cube IMPLEMENTATION.
       ENDDO.
     ENDLOOP.
 
-    IF et_msg IS NOT INITIAL.
-      RETURN.
-    ENDIF.
     et_cubies = lt_tmp.
   ENDMETHOD.
 
