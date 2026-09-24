@@ -107,7 +107,6 @@ CLASS lcl_solver IMPLEMENTATION.
       DATA(lv_petal) = -1.
       LOOP AT lt_sides INTO lv_side.
         DATA(lv_idx) = lcl_cube=>find_cubie( it_cubies = mt_cubies iv_colors = |W{ lv_side }| ).
-        CLEAR ls_cubie.
         IF lv_idx >= 0 AND lcl_cube=>y_of( lv_idx ) = 1.
           READ TABLE mt_cubies INTO DATA(ls_cubie) WITH KEY idx = lv_idx.
           IF ls_cubie-cy = 'W'.
@@ -450,9 +449,9 @@ CLASS lcl_solver IMPLEMENTATION.
     APPEND VALUE #( state = lv_start parent = 0 move = space depth = 0 ) TO lt_queue.
 
     DATA lt_moves18 TYPE STANDARD TABLE OF ty_c2 WITH EMPTY KEY.
-    lt_moves18 = VALUE #( ( 'U' ) ( `U'` ) ( 'U2' ) ( 'D' ) ( `D'` ) ( 'D2' )
-                          ( 'R' ) ( `R'` ) ( 'R2' ) ( 'L' ) ( `L'` ) ( 'L2' )
-                          ( 'F' ) ( `F'` ) ( 'F2' ) ( 'B' ) ( `B'` ) ( 'B2' ) ).
+    lt_moves18 = VALUE #( ( 'U' ) ( 'U''' ) ( 'U2' ) ( 'D' ) ( 'D''' ) ( 'D2' )
+                          ( 'R' ) ( 'R''' ) ( 'R2' ) ( 'L' ) ( 'L''' ) ( 'L2' )
+                          ( 'F' ) ( 'F''' ) ( 'F2' ) ( 'B' ) ( 'B''' ) ( 'B2' ) ).
 
     WHILE lv_head <= lines( lt_queue ).
       READ TABLE lt_queue INTO DATA(ls_node) INDEX lv_head.
@@ -536,7 +535,7 @@ CLASS lcl_solver IMPLEMENTATION.
                      ( lcl_cube=>idx_of( iv_x = 1  iv_y = 1 iv_z = -1 ) )
                      ( lcl_cube=>idx_of( iv_x = -1 iv_y = 1 iv_z = -1 ) )
                      ( lcl_cube=>idx_of( iv_x = -1 iv_y = 1 iv_z = 1 ) ) ).
-    DATA lt_homes TYPE STANDARD TABLE OF ty_c3 WITH EMPTY KEY.
+    DATA lt_homes TYPE STANDARD TABLE OF ty_c3.
     lt_homes = VALUE #( ( 'BOY' ) ( 'BRY' ) ( 'GOY' ) ( 'GRY' ) ).
     SORT lt_homes.
     CLEAR lt_perm.

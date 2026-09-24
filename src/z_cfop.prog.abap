@@ -44,7 +44,7 @@ START-OF-SELECTION.
     " 打乱演示：还原态 + 打乱公式 → 求解
     WRITE: / '打乱公式:', p_scram.
     ULINE.
-    lt_cubies = lcl_cube=>apply_alg( it_cubies = lcl_cube=>solved_state( ) iv_alg = p_scram ).
+    lt_cubies = lcl_cube=>apply_alg( it_cubies = lcl_cube=>solved_state( ) iv_alg = CONV string( p_scram ) ).
     IF lcl_cube=>sv_error IS NOT INITIAL.
       WRITE: / '错误:' COLOR COL_NEGATIVE, lcl_cube=>sv_error.
       RETURN.
@@ -117,16 +117,17 @@ FORM frm_self_test.
   WRITE: / '==== Z_CFOP 自检 ===='.
 
   " —— 0) 复原态判定 ——
-  DATA lt_solved = lcl_cube=>solved_state( ).
+  DATA lt_solved TYPE tt_cubie.
+  lt_solved = lcl_cube=>solved_state( ).
   DATA lv_b TYPE abap_bool.
   lv_b = boolc( lcl_cube=>is_solved( lt_solved ) = abap_true ).
   PERFORM frm_report USING '引擎：复原态判定' lv_b CHANGING lv_pass lv_fail.
 
   " —— 1) 18 种基本转动均为 4 阶、逆转动抵消 ——
   DATA lt_moves TYPE STANDARD TABLE OF ty_c2 WITH EMPTY KEY.
-  lt_moves = VALUE #( ( 'U' ) ( `U'` ) ( 'U2' ) ( 'D' ) ( `D'` ) ( 'D2' )
-                      ( 'R' ) ( `R'` ) ( 'R2' ) ( 'L' ) ( `L'` ) ( 'L2' )
-                      ( 'F' ) ( `F'` ) ( 'F2' ) ( 'B' ) ( `B'` ) ( 'B2' ) ).
+  lt_moves = VALUE #( ( 'U' ) ( 'U''' ) ( 'U2' ) ( 'D' ) ( 'D''' ) ( 'D2' )
+                      ( 'R' ) ( 'R''' ) ( 'R2' ) ( 'L' ) ( 'L''' ) ( 'L2' )
+                      ( 'F' ) ( 'F''' ) ( 'F2' ) ( 'B' ) ( 'B''' ) ( 'B2' ) ).
 
   DATA lv_ok TYPE abap_bool VALUE abap_true.
   LOOP AT lt_moves INTO DATA(lv_mv).
@@ -244,7 +245,8 @@ FORM frm_self_test.
       ENDLOOP.
       lv_ok = lcl_cube=>is_solved( lt_c ).
     ENDIF.
-    PERFORM frm_report USING |端到端：打乱→求解→复原（{ lv_scr }）| lv_ok CHANGING lv_pass lv_fail.
+    DATA(lv_title) = |端到端：打乱→求解→复原（{ lv_scr }）|.
+    PERFORM frm_report USING lv_title lv_ok CHANGING lv_pass lv_fail.
   ENDDO.
 
   ULINE.

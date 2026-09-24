@@ -232,27 +232,28 @@ CLASS lcl_cube IMPLEMENTATION.
         DATA(lv_x) = x_of( ls_cubie-idx ).
         DATA(lv_y) = y_of( ls_cubie-idx ).
         DATA(lv_z) = z_of( ls_cubie-idx ).
-        DATA(lv_t) = space.
+        DATA: lv_t TYPE c LENGTH 1,
+              lv_n TYPE i.
         DO ls_spec-cw TIMES.
           CASE ls_spec-axis.
             WHEN 1.  " x: y'=z z'=-y，交换 cy,cz
-              lv_t = lv_y.
+              lv_n = lv_y.
               lv_y = lv_z.
-              lv_z = - lv_t.
+              lv_z = - lv_n.
               lv_t = ls_cubie-cy.
               ls_cubie-cy = ls_cubie-cz.
               ls_cubie-cz = lv_t.
             WHEN 2.  " y: z'=x x'=-z，交换 cz,cx
-              lv_t = lv_z.
+              lv_n = lv_z.
               lv_z = lv_x.
-              lv_x = - lv_t.
+              lv_x = - lv_n.
               lv_t = ls_cubie-cz.
               ls_cubie-cz = ls_cubie-cx.
               ls_cubie-cx = lv_t.
             WHEN 3.  " z: x'=y y'=-x，交换 cx,cy
-              lv_t = lv_x.
+              lv_n = lv_x.
               lv_x = lv_y.
-              lv_y = - lv_t.
+              lv_y = - lv_n.
               lv_t = ls_cubie-cx.
               ls_cubie-cx = ls_cubie-cy.
               ls_cubie-cy = lv_t.
@@ -456,8 +457,8 @@ CLASS lcl_cube IMPLEMENTATION.
 
   METHOD check.
     " —— 1) 部件存在性：8 角 + 12 棱颜色组合与标准魔方一致 ——
-    DATA lt_corner TYPE STANDARD TABLE OF ty_c3 WITH EMPTY KEY.
-    DATA lt_edge   TYPE STANDARD TABLE OF ty_c3 WITH EMPTY KEY.
+    DATA lt_corner TYPE STANDARD TABLE OF ty_c3.
+    DATA lt_edge   TYPE STANDARD TABLE OF ty_c3.
     LOOP AT it_cubies INTO DATA(ls_cubie).
       DATA(lv_n) = abs( x_of( ls_cubie-idx ) ) + abs( y_of( ls_cubie-idx ) ) + abs( z_of( ls_cubie-idx ) ).
       IF lv_n = 3.
@@ -550,8 +551,8 @@ CLASS lcl_cube IMPLEMENTATION.
     ENDIF.
 
     " —— 4) 排列奇偶一致：角排列与棱排列奇偶必须相同 ——
-    DATA lt_chome TYPE STANDARD TABLE OF ty_c3 WITH EMPTY KEY.
-    DATA lt_ehome TYPE STANDARD TABLE OF ty_c3 WITH EMPTY KEY.
+    DATA lt_chome TYPE STANDARD TABLE OF ty_c3.
+    DATA lt_ehome TYPE STANDARD TABLE OF ty_c3.
     lt_chome = lt_corner_exp.
     lt_ehome = lt_edge_exp.
     SORT lt_chome.
@@ -560,14 +561,14 @@ CLASS lcl_cube IMPLEMENTATION.
           lt_eperm TYPE STANDARD TABLE OF i WITH EMPTY KEY,
           lv_inv_c TYPE i VALUE 0,
           lv_inv_e TYPE i VALUE 0.
-    LOOP AT lt_corners INTO DATA(lv_cidx).
-      READ TABLE it_cubies INTO DATA(ls_corn) WITH KEY idx = lv_cidx.
-      READ TABLE lt_chome TRANSPORTING NO FIELD WITH KEY table_line = cubie_colors( ls_corn ).
+    LOOP AT lt_corners INTO lv_cidx.
+      READ TABLE it_cubies INTO ls_corn WITH KEY idx = lv_cidx.
+      READ TABLE lt_chome TRANSPORTING NO FIELDS WITH KEY table_line = cubie_colors( ls_corn ).
       APPEND sy-tabix TO lt_cperm.
     ENDLOOP.
-    LOOP AT lt_edges INTO DATA(lv_eidx).
-      READ TABLE it_cubies INTO DATA(ls_edge) WITH KEY idx = lv_eidx.
-      READ TABLE lt_ehome TRANSPORTING NO FIELD WITH KEY table_line = cubie_colors( ls_edge ).
+    LOOP AT lt_edges INTO lv_eidx.
+      READ TABLE it_cubies INTO ls_edge WITH KEY idx = lv_eidx.
+      READ TABLE lt_ehome TRANSPORTING NO FIELDS WITH KEY table_line = cubie_colors( ls_edge ).
       APPEND sy-tabix TO lt_eperm.
     ENDLOOP.
     DATA(lv_nc) = lines( lt_cperm ).
@@ -617,7 +618,7 @@ CLASS lcl_cube IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD cubie_colors.
-    DATA lt TYPE STANDARD TABLE OF ty_c1 WITH EMPTY KEY.
+    DATA lt TYPE STANDARD TABLE OF ty_c1.
     IF is_cubie-cx IS NOT INITIAL.
       APPEND is_cubie-cx TO lt.
     ENDIF.
@@ -632,10 +633,14 @@ CLASS lcl_cube IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD sort_colors.
-    DATA lt TYPE STANDARD TABLE OF ty_c1 WITH EMPTY KEY.
+    DATA: lt    TYPE STANDARD TABLE OF ty_c1,
+          lv_in TYPE c LENGTH 3,
+          lv_o  TYPE i.
+    lv_in = iv_colors.
     DO 3 TIMES.
-      DATA(lv_char) = substring( val = |{ iv_colors }| off = sy-index - 1 len = 1 ).
-      IF lv_char IS NOT INITIAL AND lv_char NA ' '.
+      lv_o = sy-index - 1.
+      DATA(lv_char) = lv_in+lv_o(1).
+      IF lv_char NA ' .'.
         APPEND lv_char TO lt.
       ENDIF.
     ENDDO.
@@ -650,8 +655,8 @@ CLASS lcl_cube IMPLEMENTATION.
       DATA(lv_idx) = sy-index - 1.
       DATA(lv_off) = lv_idx * 3.
       DATA(lv_seg) = substring( val = iv_state off = lv_off len = 3 ).
-      IF lv_seg CA '.'.
-        CONTINUE.  " 含 '.' 的段不可能是棱/角块（棱角块颜色齐全）
+      IF lv_seg = '...'.
+        CONTINUE.  " 仅核心槽位三轴全无暴露面；棱/中心段可含 '.'（未暴露面）
       ENDIF.
       IF sort_colors( lv_seg ) = lv_target.
         rv_idx = lv_idx.
