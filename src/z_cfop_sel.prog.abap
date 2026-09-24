@@ -9,7 +9,10 @@
 
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE tblock1.
 
-" —— 展开示意图（与 pic/展开图.png 一致）——
+" —— 实物拿法 + 展开示意图（与 pic/展开图.png 一致）——
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(70) t_hold.
+SELECTION-SCREEN END OF LINE.
 SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 5(70) t_pic00.
 SELECTION-SCREEN END OF LINE.
@@ -140,6 +143,7 @@ SELECTION-SCREEN END OF BLOCK b3.
 *&---------------------------------------------------------------------*
 FORM frm_initialization.
   tblock1 = '魔方录入（每面 9 贴纸：黄橙蓝红绿白）'.
+  t_hold = '实物拿法：黄面朝上、绿面正对你（前），红在左、橙在右、蓝在后、白在底'.
   t_pic00 = '展开示意图（每面从外侧看，1-9 = 行优先录入顺序）'.
   t_pic01 = '+-------+'.
   t_pic02 = '| 1 2 3 |'.
