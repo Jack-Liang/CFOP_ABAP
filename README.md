@@ -34,7 +34,7 @@ y' = z    z' = -y    交换 cy, cz
 
  <img src="https://github.com/Jack-Liang/CFOP_ABAP/blob/main/pic/%E5%B1%95%E5%BC%80%E5%9B%BE.png" width = "622" height = "460.5" alt="魔方展开图" align=center />
 
-按黄、橙、蓝、红、绿、白依次录入六面，每面 9 个贴纸（从该面外侧看，行自上而下、列自左到右）：
+按黄、橙、蓝、红、绿、白依次录入六面，每面 9 个贴纸（从该面外侧看，按示意图 1-9 行优先顺序：先第一行从左到右 3 个，再第二行，最后第三行）：
 
 ```
 YYYYYYYYY

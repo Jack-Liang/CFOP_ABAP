@@ -2,11 +2,60 @@
 *& 包含 Z_CFOP_SEL：选择屏幕
 *&---------------------------------------------------------------------*
 * 录入顺序（与展开图一致）：黄、橙、蓝、红、绿、白
-* 每面 9 个贴纸：从该面外侧看，行自上而下、列自左到右。
+* 每面 9 个贴纸：从该面外侧看，按示意图 1-9 行优先顺序
+* （先第一行从左到右 3 个，再第二行，最后第三行）。
 * 面的朝向由中心色决定，系统按标准配色放入固定坐标系
 * （白底、黄顶、绿前、蓝后、红右、橙左）。
 
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE tblock1.
+
+" —— 展开示意图（与 pic/展开图.png 一致）——
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(70) t_pic00.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic01.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic02.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic03.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic04.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(70) t_pic05.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(70) t_pic06.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(70) t_pic07.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(70) t_pic08.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 5(70) t_pic09.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic10.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic11.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic12.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic13.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 13(70) t_pic14.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN SKIP.
 
 " —— 录入说明 ——
 SELECTION-SCREEN BEGIN OF LINE.
@@ -86,8 +135,23 @@ SELECTION-SCREEN END OF BLOCK b3.
 *&---------------------------------------------------------------------*
 FORM frm_initialization.
   tblock1 = '魔方录入（每面 9 贴纸：黄橙蓝红绿白）'.
+  t_pic00 = '展开示意图（每面从外侧看，1-9 = 行优先录入顺序）'.
+  t_pic01 = '+-------+'.
+  t_pic02 = '| 1 2 3 |'.
+  t_pic03 = '| 4 5 6 |    1) 黄面 U 顶'.
+  t_pic04 = '| 7 8 9 |'.
+  t_pic05 = '+-------+-------+-------+-------+'.
+  t_pic06 = '| 1 2 3 | 1 2 3 | 1 2 3 | 1 2 3 |'.
+  t_pic07 = '| 4 5 6 | 4 5 6 | 4 5 6 | 4 5 6 |    2)橙 3)蓝 4)红 5)绿'.
+  t_pic08 = '| 7 8 9 | 7 8 9 | 7 8 9 | 7 8 9 |'.
+  t_pic09 = '+-------+-------+-------+-------+'.
+  t_pic10 = '+-------+'.
+  t_pic11 = '| 1 2 3 |'.
+  t_pic12 = '| 4 5 6 |    6) 白面 D 底'.
+  t_pic13 = '| 7 8 9 |'.
+  t_pic14 = '+-------+'.
   t_hint1 = '录入说明：每面输入 9 个颜色字母（Y=黄 O=橙 B=蓝 R=红 G=绿 W=白），'.
-  t_hint2 = '从该面正对魔方观察：行自上而下、列从左到右；中心贴纸决定面的朝向。'.
+  t_hint2 = '从该面正对魔方按 1-9 录入：第一行左到右，再二、三行；中心贴纸定朝向。'.
   t_hint3 = '示例：复原态黄色面 YYYYYYYYY；也可点下方按钮一键填入复原态。'.
   t_yellow = '黄色面'.
   t_orange = '橙色面'.
